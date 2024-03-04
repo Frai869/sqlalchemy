@@ -26,15 +26,16 @@ for record in data:
     session.add(model(id=record.get('pk'), **record.get('fields')))
 session.commit()
 
-in_pub = input('Введите идентификатор издателя (Publisher_id):')
-q = session.query(Book.title, Shop.name, Sale.price, Sale.date_sale).join(Publisher.books).join(Book.stocks1).join(Stock.shop).join(Stock.sales).filter(Publisher.id == in_pub)
-# print(q)
-print('У запрашиваемого издательства проданы книги (наименование, магазин, стоимость, дата покупки):')
-for b in q:
-    print(b)
+def get_shops(in_pub):
+    q = session.query(Book.title, Shop.name, Sale.price, Sale.date_sale).join(Publisher.books).join(Book.stocks1).join(Stock.shop).join(Stock.sales)
+    if in_pub.isdigit():
+        q_ = q.filter(Publisher.id == in_pub).all
+    else:
+        q_ = q.filter(Shop.name == in_pub).all()
+    for title_, shop_, sale_, date_ in q_:
+        print(f"{title_: <40} | {shop_: <10} | {sale_: <8} | {date_.strftime('%d-%m-%Y')}")
 session.close()
 
-
-
-
-
+if __name__ == '__main__':
+    in_pub = input("Введите имя издателя или его идентификатор:")
+    get_shops(in_pub)
